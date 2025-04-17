@@ -1,0 +1,13 @@
+body {
+  overflow: hidden;
+  background-color: black;
+  margin: 0;
+}
+
+#player-container {
+  height: 100vh;
+  max-height: 100vh;
+  width: 100vw;
+  max-width: 100vw;
+  overflow: hidden;
+}
