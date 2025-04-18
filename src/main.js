@@ -28,8 +28,8 @@ async function updateTrackInfo() {
   }
 
   try {
-	  isUpdatingTrackInfo = true;
-	
+    isUpdatingTrackInfo = true;
+    
     const response = await fetch('http://localhost:9863/query');
     
     if (!response.ok) {
@@ -95,8 +95,8 @@ let lastTime = -1;  // 上一帧的时间戳
  */
 function frame(time) {
   if (lastTime === -1) {
-		lastTime = time;
-	}
+    lastTime = time;
+  }
   
   // 更新播放器状态
   if (!isPaused) {
@@ -104,7 +104,7 @@ function frame(time) {
   }
   
   player.update(time - lastTime);
-	lastTime = time;
+  lastTime = time;
   
   // 请求下一帧更新
   requestAnimationFrame(frame);
