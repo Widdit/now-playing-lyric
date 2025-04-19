@@ -38,9 +38,18 @@ async function updateTrackInfo() {
     
     const data = await response.json();
 
+    let isPlayingStatusChanged = data.player.isPaused !== isPaused;
+    let isTrackedChanged = data.player.seekbarCurrentPosition < seekbarPosition;
+
+    title = data.track.title;
+    author = data.track.author;
+    isPaused = data.player.isPaused;
+    coverUrl = data.track.cover;
+    seekbarPosition = data.player.seekbarCurrentPosition;
+
     // 播放状态变更
-    if (data.player.isPaused !== isPaused) {
-      if (data.player.isPaused) {
+    if (isPlayingStatusChanged) {
+      if (isPaused) {
         timer.pause();
       } else {
         timer.start();
@@ -48,7 +57,7 @@ async function updateTrackInfo() {
     }
 
     // 歌曲变更（当歌曲进度突然递减时，说明切歌/单曲循环了）
-    if (data.player.seekbarCurrentPosition < seekbarPosition) {
+    if (isTrackedChanged) {
       // 重置计时器
       timer.reset();
 
@@ -58,24 +67,18 @@ async function updateTrackInfo() {
       // 设置歌词
       player.setLyricLines(lyricLines);
 	  
-      // 获取歌曲最新状态（此时重新 query，是因为上一步获取歌词有一定耗时，为了使歌词时间轴更准确，所以获取最新状态）
-      const newResponse = await fetch('http://localhost:9863/query');
+      // 获取歌曲进度条毫秒值
+      const newResponse = await fetch('http://localhost:9863/query/progress');
       const newData = await newResponse.json();
       
       // 启动计时器
-      timer.setTime(newData.player.seekbarCurrentPosition * 1000 + 1500);
+      timer.setTime(newData.progress + 1200);
       timer.start();
 
       // 设置背景
-      bg.setAlbum(newData.track.cover);
+      bg.setAlbum(coverUrl);
     }
-
-    title = data.track.title;
-    author = data.track.author;
-    isPaused = data.player.isPaused;
-    coverUrl = data.track.cover;
-    seekbarPosition = data.player.seekbarCurrentPosition;
-
+  
   } catch (error) {
     console.error(`更新歌曲信息时出错：${error}`);
 
@@ -132,8 +135,12 @@ async function init() {
   // 获取当前播放的歌曲信息
   await updateTrackInfo();
 
+  // 获取歌曲进度条毫秒值
+  const response = await fetch('http://localhost:9863/query/progress');
+  const data = await response.json();
+  
   // 启动计时器
-  timer.setTime(seekbarPosition * 1000 + 1500);
+  timer.setTime(data.progress + 1200);
   timer.start();
 
   // 启动歌词动画
