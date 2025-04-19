@@ -76,7 +76,8 @@ async function updateTrackInfo() {
       timer.start();
 
       // 设置背景
-      bg.setAlbum(coverUrl);
+      const base64Image = await fetchBase64Image(coverUrl);
+      bg.setAlbum(base64Image);
     }
   
   } catch (error) {
@@ -114,6 +115,33 @@ function frame(time) {
 }
 
 /**
+ * 获取专辑图片的 BASE64 编码字符串
+ * @param {string} coverUrl 专辑图片 URL
+ * @returns 专辑图片的 BASE64 编码字符串
+ */
+async function fetchBase64Image(coverUrl) {
+  try {
+    const response = await fetch('http://localhost:9863/cover/convert', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ cover_url: coverUrl }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.base64Img;
+
+  } catch (error) {
+    console.error('Fetch base64Image failed:', error);
+  }
+}
+
+/**
  * 初始化
  */
 async function init() {
@@ -147,7 +175,8 @@ async function init() {
   requestAnimationFrame(frame);
 
   // 设置背景
-  bg.setAlbum(coverUrl);
+  const base64Image = await fetchBase64Image(coverUrl);
+  bg.setAlbum(base64Image);
 }
 
 await init();
